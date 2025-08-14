@@ -10,11 +10,17 @@ const EnglishSpellingApp = () => {
   ];
 
   const resetPractice = () => {
-    return;
+    setWordsToLearn([...allWords]);
+    setCurrentWord(null);
+    setShuffledLetters([]);
+    setUserTypedText('');
+    setWrongLetterPositions(new Set());
+    setUsedLetterIds([]);
   }
 
   const addNewWords = () => {
     const parced = parseWordsFromText(newWordsInput);
+    if (parced.length === 0) return;
     const updatedWords = createUniqueWordList([...allWords, ...parced]);
     
     setAllWords(updatedWords);
