@@ -85,7 +85,7 @@ const EnglishSpellingApp = () => {
       return <span className='text-gray-400, italic'>Type the word...</span>
     }
     return userTypedText.split('').map((letter, index) => {
-      const hasError = false; // TODO: handle error
+      const hasError = wrongLetterPositions.has(index);
       return (
         <span 
           key={index}
@@ -111,14 +111,18 @@ const EnglishSpellingApp = () => {
     }
     
     const targetPosition = findNextPositionToType();
-    console.log(targetWord);
-    console.log(targetPosition);
     if (letter == targetWord[targetPosition]) {
       setUserTypedText((prev) => {
         return prev + letter.toUpperCase();
       });
     } else {
-      console.log('wrong');
+      setUserTypedText((prev) => {
+        return prev + letter.toUpperCase();
+      });
+      setWrongLetterPositions((prev) => {
+        return new Set([...prev, targetPosition])
+      });
+      console.log(wrongLetterPositions);
     }
 
 
