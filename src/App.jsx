@@ -20,6 +20,9 @@ const EnglishSpellingApp = () => {
   };
 
   const removeWord = (englishWord) => {
+    const updatedWords = allWords.filter(word => word.english !== englishWord);
+    setAllWords(updatedWords);
+    setWordsToLearn(updatedWords);
   }
 
   const loadWordsFromStorage = () => {
