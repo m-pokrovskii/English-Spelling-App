@@ -43,6 +43,16 @@ const EnglishSpellingApp = () => {
   const isDefaultWord = (englishWord) => {
     return DEFAULT_WORDS.some(word => word.english === englishWord);
   }
+  // Cudos to The Fisher–Yates algorithm
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
 
   // Hooks
 
@@ -54,7 +64,8 @@ const EnglishSpellingApp = () => {
   const [userTypedText, setUserTypedText] = useState('');
   const [wrongLetterPositions, setWrongLetterPositions] = useState(new Set());
   const [newWordsInput, setNewWordsInput] = useState('');
-  const [usedLettersIds ,setUsedLetterIds] = []
+  const [usedLettersIds ,setUsedLetterIds] = useState([])
+  const [shuffledLetters, setShuffledLetters] = useState([]);
 
   // Save to localStorage whenever allWords changes
   useEffect(() => {
@@ -69,6 +80,7 @@ const EnglishSpellingApp = () => {
 
     const randomIndex = Math.floor(Math.random() * wordsToLearn.length);
     const selectedWord = wordsToLearn[randomIndex];
+
     setCurrentWord(selectedWord);
     setShuffledLetters(shuffleArray(createLettersWithIds(selectedWord.english)));
     setUserTypedText('');
