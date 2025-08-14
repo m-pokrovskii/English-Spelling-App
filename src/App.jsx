@@ -93,6 +93,10 @@ const EnglishSpellingApp = () => {
   }, [selectRandomWord])
 
 
+  if (!currentWord) {
+    return null;
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-6 sm:mb-10">
