@@ -65,25 +65,111 @@ const SpellingApp = () => {
 
 
   // Handle letter click
-  const handleLetterClick = (letter, letterId) => {
-    if (usedLetters.includes(letterId)) return;
+  const handleLetterClick = (letterObj) => {
+    handleLetterInput(letterObj.letter, letterObj.id);
+  };
 
-    const nextPosition = userInput.length;
-    const correctLetter = currentWord.english[nextPosition];
-    if (letter === correctLetter) {
-      setUserInput(prev => prev + letter);
-      setUsedLetters(prev => [...prev, letterId]);
-      // Remove error if it existed at this position
-      if (errorPositions.has(nextPosition)) {
-        const newErrors = new Set(errorPositions);
-        newErrors.delete(nextPosition);
-        setErrorPositions(newErrors);
+  const handleLetterInput = (inputLetter, letterId = null) => {
+    if (!currentWord) return;
+    
+    const letter = inputLetter.toLowerCase();
+    const targetWord = currentWord.english.toLowerCase();
+    
+    // Check if letter exists in the current word
+    if (!targetWord.includes(letter)) return;
+    
+    // For keyboard input, find an available letter
+    let availableLetterId = letterId;
+    if (!availableLetterId) {
+      const availableLetter = shuffledLetters.find(l => 
+        l.letter.toLowerCase() === letter && !usedLetters.includes(l.id)
+      );
+      if (!availableLetter) return;
+      availableLetterId = availableLetter.id;
+    }
+    
+    // Check if this specific letter is still available
+    if (usedLetters.includes(availableLetterId)) return;
+
+    // Find the next position to type (first error position or end of input)
+    let targetPosition = userInput.length;
+    
+    // If we have errors, find the first error position
+    const errorPositionArray = Array.from(errorPositions).sort((a, b) => a - b);
+    if (errorPositionArray.length > 0) {
+      targetPosition = errorPositionArray[0];
+    }
+    
+    const targetLetter = targetWord[targetPosition];
+    
+    if (letter === targetLetter) {
+      // Correct letter
+      let newInput = userInput;
+      
+      if (targetPosition < userInput.length) {
+        // Replace wrong letter at target position
+        newInput = userInput.substring(0, targetPosition) + letter.toUpperCase() + userInput.substring(targetPosition + 1);
+        
+        // Free up the previously used wrong letter at this position
+        const previousLetterId = usedLetters[targetPosition];
+        if (previousLetterId) {
+          setUsedLetters(prev => prev.filter(id => id !== previousLetterId));
+        }
+      } else {
+        // Add correct letter at the end
+        newInput = userInput + letter.toUpperCase();
+      }
+      
+      setUserInput(newInput);
+      
+      // Remove error from this position
+      const newErrorPositions = new Set(errorPositions);
+      newErrorPositions.delete(targetPosition);
+      setErrorPositions(newErrorPositions);
+      
+      // Mark this letter as used at the correct position
+      const newUsedLetters = [...usedLetters];
+      newUsedLetters[targetPosition] = availableLetterId;
+      setUsedLetters(newUsedLetters);
+      
+      // Check if word is complete
+      if (newInput.length === currentWord.english.length && newErrorPositions.size === 0) {
+        setTimeout(() => {
+          // Remove completed word from available words
+          setAvailableWords(prev => 
+            prev.filter(word => word.english !== currentWord.english)
+          );
+          pickRandomWord();
+        }, 1000);
       }
     } else {
-      // Wrong letter - mark error position
-      setUserInput(prev => prev + letter);
-      setErrorPositions(prev => new Set(prev).add(nextPosition));
-      setUsedLetters(prev => [...prev, letterId]);
+      // Wrong letter
+      const newErrorPositions = new Set(errorPositions);
+      let newInput = userInput;
+      
+      if (targetPosition < userInput.length) {
+        // Replace wrong letter at target position
+        newInput = userInput.substring(0, targetPosition) + letter.toUpperCase() + userInput.substring(targetPosition + 1);
+        
+        // Free up the previously used wrong letter at this position
+        const previousLetterId = usedLetters[targetPosition];
+        if (previousLetterId) {
+          setUsedLetters(prev => prev.filter(id => id !== previousLetterId));
+        }
+      } else {
+        // Add wrong letter at the end
+        newInput = userInput + letter.toUpperCase();
+      }
+      
+      setUserInput(newInput);
+      
+      // Mark this letter as used at the target position
+      const newUsedLetters = [...usedLetters];
+      newUsedLetters[targetPosition] = availableLetterId;
+      setUsedLetters(newUsedLetters);
+      
+      newErrorPositions.add(targetPosition);
+      setErrorPositions(newErrorPositions);
     }
   };
 
@@ -100,7 +186,7 @@ const SpellingApp = () => {
       {/* Translation Section */}
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <h2 className="text-2xl font-semibold mb-6">Translation</h2>
-        <div className="text-3xl text-center">
+        <div className="text-3xl text-center uppercase">
           {currentWord.russian}
         </div>
       </div>
