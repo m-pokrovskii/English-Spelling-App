@@ -99,36 +99,100 @@ const EnglishSpellingApp = () => {
 
 
 
-  const handleLetterInput = (inputLetter, leterId = null) => {
+  const handleLetterInput = (inputLetter, letterId = null) => {
     if (!currentWord) return;
+    
     const letter = inputLetter.toLowerCase();
     const targetWord = currentWord.english.toLowerCase();
-
+    
     if (letter !== ' ' && !targetWord.includes(letter)) return;
+    
+    let availableLetterId = letterId;
+    
+    // Propably don't need it anymore.
+    
+    // if (!availableLetterId) {
+    //   const availableLetter = shuffledLetters.find(l => 
+    //     l.letter.toLowerCase() === letter && !usedLetterIds.includes(l.id)
+    //   );
+    //   if (!availableLetter) return;
+    //   availableLetterId = availableLetter.id;
+    // }
+    
+    if (usedLetterIds.includes(availableLetterId)) return;
 
     const findNextPositionToType = () => {
-      return userTypedText.length;
-    }
-    
+      const errorPositions = Array.from(wrongLetterPositions).sort((a, b) => a - b);
+        
+      return errorPositions.length > 0 ? errorPositions[0] : userTypedText.length;
+    };
+
     const targetPosition = findNextPositionToType();
-    if (letter == targetWord[targetPosition]) {
-      setUserTypedText((prev) => {
-        return prev + letter.toUpperCase();
-      });
-    } else {
-      setUserTypedText((prev) => {
-        return prev + letter.toUpperCase();
-      });
-      setWrongLetterPositions((prev) => {
-        return new Set([...prev, targetPosition])
-      });
-      console.log(wrongLetterPositions);
-    }
-
-
+    const expectedLetter = targetWord[targetPosition];
     
-    return;
-  }
+    if (letter === expectedLetter) {
+      handleCorrectLetter(letter, targetPosition, availableLetterId);
+    } else {
+      console.log({letter, targetPosition, userInputL: userTypedText.length, userTypedText ,availableLetterId});
+      // handleWrongLetter(letter, targetPosition, availableLetterId);
+      handleWrongLetter(letter, targetPosition, availableLetterId);
+    }
+  };
+
+  const handleCorrectLetter = (letter, position, letterId) => {
+    let newText = userTypedText;
+    
+    if (position < userTypedText.length) {
+      newText = userTypedText.substring(0, position) + letter.toUpperCase() + userTypedText.substring(position + 1);
+      const previousLetterId = usedLetterIds[position];
+      if (previousLetterId) {
+        setUsedLetterIds(prev => prev.filter(id => id !== previousLetterId));
+      }
+    } else {
+      newText = userTypedText + letter.toUpperCase();
+    }
+    
+    setUserTypedText(newText);
+    
+    const newErrorPositions = new Set(wrongLetterPositions);
+    newErrorPositions.delete(position);
+    setWrongLetterPositions(newErrorPositions);
+    
+    const newUsedLetterIds = [...usedLetterIds];
+    newUsedLetterIds[position] = letterId;
+    setUsedLetterIds(newUsedLetterIds);
+    
+    if (newText.length === currentWord.english.length && newErrorPositions.size === 0) {
+      setTimeout(() => {
+        setWordsToLearn(prev => prev.filter(word => word.english !== currentWord.english));
+        selectRandomWord();
+      }, 1000);
+    }
+  };
+
+  const handleWrongLetter = (letter, position, letterId) => {
+    let newText = userTypedText;
+    
+    if (position < userTypedText.length) {
+      newText = userTypedText.substring(0, position) + letter.toUpperCase() + userTypedText.substring(position + 1);
+      const previousLetterId = usedLetterIds[position];
+      if (previousLetterId) {
+        setUsedLetterIds(prev => prev.filter(id => id !== previousLetterId));
+      }
+    } else {
+      newText = userTypedText + letter.toUpperCase();
+    }
+    
+    setUserTypedText(newText);
+    
+    const newUsedLetterIds = [...usedLetterIds];
+    newUsedLetterIds[position] = letterId;
+    setUsedLetterIds(newUsedLetterIds);
+    
+    const newErrorPositions = new Set(wrongLetterPositions);
+    newErrorPositions.add(position);
+    setWrongLetterPositions(newErrorPositions);
+  };
 
   const selectRandomWord = useCallback(() => {
     if (wordsToLearn.length === 0 ) {
