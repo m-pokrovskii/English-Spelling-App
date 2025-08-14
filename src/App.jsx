@@ -32,7 +32,7 @@ const EnglishSpellingApp = () => {
     }
   }
 
-  const saveWordsToStorage = () => {
+  const saveWordsToStorage = (words) => {
     try {
       localStorage.setItem('allWords', JSON.stringify(words));
     } catch (error) {
