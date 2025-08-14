@@ -15,25 +15,37 @@ const EnglishSpellingApp = () => {
 
   const addNewWords = () => {
     const parced = parseWordsFromText(newWordsInput);
+    const updatedWords = createUniqueWordList([...allWords, ...parced]);
+    
+    setAllWords(updatedWords);
+    setWordsToLearn(updatedWords);
+    setNewWordsInput('');
     return;
   };
 
+  const createUniqueWordList = (words) => {
+    // Extract all English words from the list of word objects
+    const englishWords = words.map(word => word.english);
+
+    // Create a set to filter out duplicates, then convert it back to an array
+    const uniqueEnglishWords = [...new Set(englishWords)];
+
+    // Find the corresponding word object for each unique English word
+    const uniqueWords = uniqueEnglishWords.map(english => 
+      words.find(word => word.english === english)
+    );
+
+    return uniqueWords;
+  }
+
   const parseWordsFromText = (text) => {
-    const lines = text.split('\n').filter(line => line.trim());
-    const parsed = [];
-    
-    for (const line of lines) {
-      const parts = line.split(' - ');
-      if (parts.length === 2) {
-        const english = parts[0].trim();
-        const russian = parts[1].trim();
-        if (english && russian) {
-          parsed.push({ english, russian });
-        }
-      }
-    }
-    
-    return parsed;
+    const lines = text.split('\n');
+    const words = lines.reduce((acc, line) => {
+      const [english, russian] = line.trim().split(':');
+      if (english && russian) acc.push({ english, russian });
+      return acc;
+    }, []);
+    return words;
   };
 
   const removeWord = (englishWord) => {
