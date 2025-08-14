@@ -99,7 +99,10 @@ const EnglishSpellingApp = () => {
 
 
 
-
+  const handleLetterInput = (inputLetter, leterId = null) => {
+    console.log('handle leter');
+    return;
+  }
 
   const selectRandomWord = useCallback(() => {
     if (wordsToLearn.length === 0 ) {
