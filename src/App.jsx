@@ -94,7 +94,11 @@ const EnglishSpellingApp = () => {
 
 
   if (!currentWord) {
-    return null;
+    if (wordsToLearn.length === 0) {
+      // Word Management goes there
+      return 
+    }
+    return <div className='flex justify-center items-center min-h-screen'>Loading...</div>
   }
 
   return (
