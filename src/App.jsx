@@ -100,7 +100,29 @@ const EnglishSpellingApp = () => {
 
 
   const handleLetterInput = (inputLetter, leterId = null) => {
-    console.log('handle leter');
+    if (!currentWord) return;
+    const letter = inputLetter.toLowerCase();
+    const targetWord = currentWord.english.toLowerCase();
+
+    if (letter !== ' ' && !targetWord.includes(letter)) return;
+
+    const findNextPositionToType = () => {
+      return userTypedText.length;
+    }
+    
+    const targetPosition = findNextPositionToType();
+    console.log(targetWord);
+    console.log(targetPosition);
+    if (letter == targetWord[targetPosition]) {
+      setUserTypedText((prev) => {
+        return prev + letter.toUpperCase();
+      });
+    } else {
+      console.log('wrong');
+    }
+
+
+    
     return;
   }
 
