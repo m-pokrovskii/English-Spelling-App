@@ -53,6 +53,14 @@ const EnglishSpellingApp = () => {
     return shuffled;
   };
 
+  const createLettersWithIds = (word) => {
+    return word.split('').map((letter,index) => (
+      {
+        id: `${letter}_${index}`,
+        letter
+      }
+    ));
+  }
 
   // Hooks
 
@@ -64,13 +72,34 @@ const EnglishSpellingApp = () => {
   const [userTypedText, setUserTypedText] = useState('');
   const [wrongLetterPositions, setWrongLetterPositions] = useState(new Set());
   const [newWordsInput, setNewWordsInput] = useState('');
-  const [usedLettersIds ,setUsedLetterIds] = useState([])
+  const [usedLetterIds ,setUsedLetterIds] = useState([])
   const [shuffledLetters, setShuffledLetters] = useState([]);
 
   // Save to localStorage whenever allWords changes
   useEffect(() => {
     saveWordsToStorage(allWords);
   }, [allWords]);
+
+  const renderTypedResult = () => {
+    if (!userTypedText) {
+      return <span className='text-gray-400, italic'>Type the word...</span>
+    }
+    return userTypedText.split('').map((letter, index) => {
+      const hasError = false; // TODO: handle error
+      return (
+        <span 
+          key={index}
+          className={hasError ? 'text-red-600 border-b-2 border-red-600 bg-red-100' :'text-gray-900'}
+        >
+          {letter === ' ' ? '&nbsp;': letter}
+        </span>
+      )
+    })
+  }
+
+
+
+
 
   const selectRandomWord = useCallback(() => {
     if (wordsToLearn.length === 0 ) {
@@ -82,7 +111,11 @@ const EnglishSpellingApp = () => {
     const selectedWord = wordsToLearn[randomIndex];
 
     setCurrentWord(selectedWord);
-    setShuffledLetters(shuffleArray(createLettersWithIds(selectedWord.english)));
+    setShuffledLetters(
+      shuffleArray(
+        createLettersWithIds(selectedWord.english)
+      )
+    );
     setUserTypedText('');
     setWrongLetterPositions(new Set());
     setUsedLetterIds([]);
@@ -100,6 +133,8 @@ const EnglishSpellingApp = () => {
     }
     return <div className='flex justify-center items-center min-h-screen'>Loading...</div>
   }
+
+  const isWordComplete = userTypedText.length === currentWord.english.length && wrongLetterPositions.size === 0;
 
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
