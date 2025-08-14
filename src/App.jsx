@@ -14,8 +14,13 @@ const EnglishSpellingApp = () => {
   }
 
   const addNewWords = () => {
-    return;
   };
+
+  const parseWordsFromText = (text) => {
+  };
+
+  const removeWord = (englishWord) => {
+  }
 
   const loadWordsFromStorage = () => {
     try {
@@ -98,7 +103,6 @@ const EnglishSpellingApp = () => {
   }
 
 
-
   const handleLetterInput = (inputLetter, letterId = null) => {
     if (!currentWord) return;
     
@@ -109,15 +113,15 @@ const EnglishSpellingApp = () => {
     
     let availableLetterId = letterId;
     
-    // Propably don't need it anymore.
-    
-    // if (!availableLetterId) {
-    //   const availableLetter = shuffledLetters.find(l => 
-    //     l.letter.toLowerCase() === letter && !usedLetterIds.includes(l.id)
-    //   );
-    //   if (!availableLetter) return;
-    //   availableLetterId = availableLetter.id;
-    // }
+    // For keydown
+
+    if (!availableLetterId) {
+      const availableLetter = shuffledLetters.find(l => 
+        l.letter.toLowerCase() === letter && !usedLetterIds.includes(l.id)
+      );
+      if (!availableLetter) return;
+      availableLetterId = availableLetter.id;
+    }
     
     if (usedLetterIds.includes(availableLetterId)) return;
 
@@ -134,7 +138,6 @@ const EnglishSpellingApp = () => {
       handleCorrectLetter(letter, targetPosition, availableLetterId);
     } else {
       console.log({letter, targetPosition, userInputL: userTypedText.length, userTypedText ,availableLetterId});
-      // handleWrongLetter(letter, targetPosition, availableLetterId);
       handleWrongLetter(letter, targetPosition, availableLetterId);
     }
   };
@@ -193,6 +196,27 @@ const EnglishSpellingApp = () => {
     newErrorPositions.add(position);
     setWrongLetterPositions(newErrorPositions);
   };
+
+  const handleKeyPress = (event) => {
+    const key = event.key.toLowerCase();
+    
+    if (!/^[a-z ]$/.test(key)) return;
+    
+    // Only prevent space in the game area, not when adding words
+    if (key === ' ' && !event.target.matches('textarea')) {
+      event.preventDefault();
+    }
+    
+    // Only handle letter input if not typing in textarea
+    if (!event.target.matches('textarea')) {
+      handleLetterInput(key);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [currentWord, userTypedText, wrongLetterPositions, shuffledLetters, usedLetterIds]);
 
   const selectRandomWord = useCallback(() => {
     if (wordsToLearn.length === 0 ) {
@@ -253,7 +277,7 @@ const EnglishSpellingApp = () => {
         <textarea
           value={newWordsInput}
           onChange={(e) => setNewWordsInput(e.target.value)}
-          placeholder="Add new words (one per line):&#10;table - стол&#10;spinning wheel - прялка"
+          placeholder="Add new words (one per line):&#10;table:стол&#10;spinning wheel:прялка"
           className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg min-h-20 sm:min-h-24 mb-3 sm:mb-4 font-mono text-sm"
           rows={4}
         />
@@ -282,7 +306,7 @@ const EnglishSpellingApp = () => {
                 </span>
                 <button
                   onClick={() => removeWord(word.english)}
-                  className="text-red-500 hover:text-red-700 text-lg sm:text-xl flex-shrink-0"
+                  className="text-red-500 hover:text-red-700 text-lg sm:text-xl flex-shrink-0 cursor-pointer"
                   title="Remove word"
                 >
                   ×
