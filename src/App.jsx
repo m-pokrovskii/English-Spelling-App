@@ -11,7 +11,13 @@ const EnglishSpellingApp = () => {
   ];
 
   const resetPractice = () => {
-    setWordsToLearn([...allWords]);
+    // if no allWords fill them
+    if (allWords.length === 0) {
+      setAllWords([...DEFAULT_WORDS]);
+      setWordsToLearn([...DEFAULT_WORDS]);
+    } else {
+      setWordsToLearn([...allWords]);
+    }
     setCurrentWord(null);
     setShuffledLetters([]);
     setUserTypedText('');
@@ -59,6 +65,11 @@ const EnglishSpellingApp = () => {
     const updatedWords = allWords.filter(word => word.english !== englishWord);
     setAllWords(updatedWords);
     setWordsToLearn(updatedWords);
+  }
+
+  const removeAllWords = () => {
+    setAllWords([]);
+    setWordsToLearn([]);
   }
 
   const loadWordsFromStorage = () => {
@@ -137,7 +148,7 @@ const EnglishSpellingApp = () => {
           key={index}
           className={hasError ? 'text-red-600 border-b-2 border-red-600 bg-red-100' :'text-gray-900'}
         >
-          {letter === ' ' ? '&nbsp;': letter}
+          {letter === ' ' ? '\u00A0': letter}
         </span>
       )
     })
@@ -284,12 +295,64 @@ const EnglishSpellingApp = () => {
   }, [selectRandomWord])
 
   const renderNoWords = () => (
-    <div className="max-w-4xl flex mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen items-center justify-center">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-6 sm:mb-10">
+        English Spelling Practice
+      </h1>
+      
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 border-b-2 border-gray-200 pb-2 sm:pb-3">
+          Add New Words
+        </h2>
+        <textarea
+          value={newWordsInput}
+          onChange={(e) => setNewWordsInput(e.target.value)}
+          placeholder="Add new words (one per line):&#10;table:стол&#10;spinning wheel:прялка"
+          className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg min-h-24 sm:min-h-32 mb-3 sm:mb-4 font-mono text-sm"
+          rows={6}
+        />
+        <button
+          onClick={addNewWords}
+          disabled={!newWordsInput.trim()}
+          className="w-full sm:w-auto bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 sm:px-6 py-2 rounded-lg font-semibold mr-0 sm:mr-4"
+        >
+          Add Words
+        </button>
+      </div>
+
+      {allWords.length > 0 && (
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 border-b-2 border-gray-200 pb-2 sm:pb-3">
+            Words ({allWords.length})
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3">
+            {allWords.map((word, index) => (
+              <div key={index} className="flex justify-between items-center bg-gray-50 p-2 sm:p-3 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm flex-1 mr-2">
+                  <span className="font-semibold">{word.english}</span> - {word.russian}
+                  {isDefaultWord(word.english) && (
+                    <span className="ml-1 sm:ml-2 text-xs bg-blue-100 text-blue-800 px-1 sm:px-2 py-1 rounded">default</span>
+                  )}
+                </span>
+                <button
+                  onClick={() => removeWord(word.english)}
+                  className="text-red-500 hover:text-red-700 text-lg sm:text-xl flex-shrink-0"
+                  title="Remove word"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="text-center text-lg sm:text-xl text-gray-600 p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-lg">
+        <p className="mb-3 sm:mb-4">No words remaining!</p>
         <p className="mb-4 sm:mb-6">Add new words above or reset to practice again.</p>
         <button
           onClick={resetPractice}
-          className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold"
+          className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold cursor-pointer"
         >
           Reset Practice
         </button>
@@ -312,64 +375,7 @@ const EnglishSpellingApp = () => {
         English Spelling Practice
       </h1>
 
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 border-b-2 border-gray-200 pb-3">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2 sm:mb-0">Add New Words</h2>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-            <span className="text-base sm:text-lg font-semibold text-blue-600">
-              Remaining: {wordsToLearn.length}/{allWords.length}
-            </span>
-            <button
-              onClick={resetPractice}
-              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold"
-            >
-              Reset
-            </button>
-          </div>
-        </div>
-        <textarea
-          value={newWordsInput}
-          onChange={(e) => setNewWordsInput(e.target.value)}
-          placeholder="Add new words (one per line):&#10;table:стол&#10;spinning wheel:прялка"
-          className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg min-h-20 sm:min-h-24 mb-3 sm:mb-4 font-mono text-sm"
-          rows={4}
-        />
-        <button
-          onClick={addNewWords}
-          disabled={!newWordsInput.trim()}
-          className="w-full sm:w-auto bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 sm:px-6 py-2 rounded-lg font-semibold"
-        >
-          Add Words
-        </button>
-      </div>
-
-      {allWords.length > 0 && (
-        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 border-b-2 border-gray-200 pb-2 sm:pb-3">
-            Words ({allWords.length})
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 max-h-32 sm:max-h-40 overflow-y-auto">
-            {allWords.map((word, index) => (
-              <div key={index} className="flex justify-between items-center bg-gray-50 p-2 sm:p-3 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm flex-1 mr-2">
-                  <span className="font-semibold">{word.english}</span> - {word.russian}
-                  {isDefaultWord(word.english) && (
-                    <span className="ml-1 sm:ml-2 text-xs bg-blue-100 text-blue-800 px-1 sm:px-2 py-1 rounded">default</span>
-                  )}
-                </span>
-                <button
-                  onClick={() => removeWord(word.english)}
-                  className="text-red-500 hover:text-red-700 text-lg sm:text-xl flex-shrink-0 cursor-pointer"
-                  title="Remove word"
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-      
+ 
       <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-4 sm:mb-6 border-b-2 border-gray-200 pb-2 sm:pb-3">
           Translation
@@ -413,6 +419,74 @@ const EnglishSpellingApp = () => {
           })}
         </div>
       </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 border-b-2 border-gray-200 pb-3">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2 sm:mb-0">Add New Words</h2>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+            <span className="text-base sm:text-lg font-semibold text-blue-600">
+              Remaining: {wordsToLearn.length}/{allWords.length}
+            </span>
+            <button
+              onClick={resetPractice}
+              className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold cursor-pointer"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+        <textarea
+          value={newWordsInput}
+          onChange={(e) => setNewWordsInput(e.target.value)}
+          placeholder="Add new words (one per line):&#10;table:стол&#10;spinning wheel:прялка"
+          className="w-full p-3 sm:p-4 border border-gray-300 rounded-lg min-h-20 sm:min-h-24 mb-3 sm:mb-4 font-mono text-sm"
+          rows={4}
+        />
+        <button
+          onClick={addNewWords}
+          disabled={!newWordsInput.trim()}
+          className="w-full sm:w-auto bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-4 sm:px-6 py-2 rounded-lg font-semibold"
+        >
+          Add Words
+        </button>
+      </div>
+
+      {allWords.length > 0 && (
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 border-b-2 border-gray-200 pb-3'>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-700 mb-2 sm:mb-0">
+              Words ({allWords.length})
+            </h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+              <button
+                onClick={removeAllWords}
+                className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg font-semibold cursor-pointer"
+              >
+                Remove All Words
+              </button>
+            </div>            
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-3 max-h-32 sm:max-h-40 overflow-y-auto">
+            {allWords.map((word, index) => (
+              <div key={index} className="flex justify-between items-center bg-gray-50 p-2 sm:p-3 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm flex-1 mr-2">
+                  <span className="font-semibold">{word.english}</span> - {word.russian}
+                  {isDefaultWord(word.english) && (
+                    <span className="ml-1 sm:ml-2 text-xs bg-blue-100 text-blue-800 px-1 sm:px-2 py-1 rounded">default</span>
+                  )}
+                </span>
+                <button
+                  onClick={() => removeWord(word.english)}
+                  className="text-red-500 hover:text-red-700 text-lg sm:text-xl flex-shrink-0 cursor-pointer"
+                  title="Remove word"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="text-center text-gray-600 text-sm sm:text-base lg:text-lg p-4 sm:p-6 bg-white rounded-lg shadow-sm">
         Type letters on your keyboard or click the letter buttons above
