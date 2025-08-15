@@ -1,14 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import dictonary from './assets/dictonary.json';
 
 const EnglishSpellingApp = () => {
   
-  const DEFAULT_WORDS = [
-    { english: 'computer', russian: 'компьютер' },
-    { english: 'telephone', russian: 'телефон' },
-    { english: 'window', russian: 'окно' },
-    { english: 'carry on', russian: 'продолжай'},
-    { english: 'girl', russian: 'девочка'}
-  ];
+  const DEFAULT_WORDS = dictonary;
 
   const resetPractice = () => {
     // if no allWords fill them
