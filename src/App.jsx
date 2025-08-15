@@ -6,7 +6,8 @@ const EnglishSpellingApp = () => {
     { english: 'computer', russian: 'компьютер' },
     { english: 'telephone', russian: 'телефон' },
     { english: 'window', russian: 'окно' },
-    { english: 'carry on', russian: 'продолжай'}
+    { english: 'carry on', russian: 'продолжай'},
+    { english: 'girl', russian: 'девочка'}
   ];
 
   const resetPractice = () => {
@@ -63,13 +64,15 @@ const EnglishSpellingApp = () => {
   const loadWordsFromStorage = () => {
     try {
       const stored = localStorage.getItem('allWords');
-      if (stored) {
+      if (stored && JSON.parse(stored).length) {
         return JSON.parse(stored);
+      } else {
+        // First time loading from the store. Save default words.
+        const initialWords = [...DEFAULT_WORDS];
+        saveWordsToStorage(initialWords);
+        return initialWords;
       }
-      // First time loading from the store. Save default words.
-      const initialWords = [...DEFAULT_WORDS];
-      saveWordsToStorage(initialWords);
-      return initialWords;
+      
     } catch (error) {
       console.log('Failed to load words from a storage');
     }
@@ -280,11 +283,23 @@ const EnglishSpellingApp = () => {
     selectRandomWord();
   }, [selectRandomWord])
 
+  const renderNoWords = () => (
+    <div className="max-w-4xl flex mx-auto p-4 sm:p-6 bg-gray-50 min-h-screen items-center justify-center">
+      <div className="text-center text-lg sm:text-xl text-gray-600 p-4 sm:p-6 lg:p-8 bg-white rounded-lg shadow-lg">
+        <p className="mb-4 sm:mb-6">Add new words above or reset to practice again.</p>
+        <button
+          onClick={resetPractice}
+          className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold"
+        >
+          Reset Practice
+        </button>
+      </div>
+    </div>
+  )
 
   if (!currentWord) {
     if (wordsToLearn.length === 0) {
-      // Word Management goes there
-      return 
+      return renderNoWords();
     }
     return <div className='flex justify-center items-center min-h-screen'>Loading...</div>
   }
