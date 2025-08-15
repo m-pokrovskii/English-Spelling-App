@@ -19,6 +19,7 @@ A focused, accessible, and responsive web app to practice English spelling via p
 ## Demo
 
 [Live URL:](https://english-spelling-app.vercel.app/])
+
 [![English Spelling App](public/screenshot.png)](https://tic-tac-toe-green-xi.vercel.app/)
 
 ## Features
